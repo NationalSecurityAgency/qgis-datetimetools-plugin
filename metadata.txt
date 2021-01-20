@@ -1,0 +1,18 @@
+[general]
+name=Date/Time Tools
+qgisMinimumVersion=3.4
+description=Conversion tools to display the local date, time, time zone, convert between UNIX time (Epoch), Julian dates, ISO8601, calculate the difference between two dates, select a location and time zone by clicking on the map and display the closet location and sun statistics. 
+version=3.0.0
+author=C Hamilton
+email=adenaculture@gmail.com
+about=Conversion tools to display the local date, time, time zone, convert between UNIX time (Epoch), Julian dates, ISO8601, calculate the difference between two dates, select a location and time zone by clicking on the map and display the closet location and sun statistics.
+tracker=https://github.com/NationalSecurityAgency/qgis-datetimetools-plugin/issues
+repository=https://github.com/NationalSecurityAgency/qgis-datetimetools-plugin
+tags=time,conversion,sun,moon
+homepage=https://github.com/NationalSecurityAgency/qgis-datetimetools-plugin
+category=Plugins
+icon=icons/dateTime.png
+experimental=False
+deprecated=False
+changelog=
+    3.0.0 - First release
