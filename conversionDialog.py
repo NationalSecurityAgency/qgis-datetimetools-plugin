@@ -1,11 +1,12 @@
 import os
 import enum
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QIcon, QFont
+from qgis.PyQt.QtGui import QIcon, QFont, QColor
 from qgis.PyQt.QtWidgets import QDockWidget, QApplication
-from qgis.PyQt.QtCore import pyqtSlot, QTime, QDate
+from qgis.PyQt.QtCore import pyqtSlot, Qt, QTime, QDate
 from qgis.PyQt.uic import loadUiType
-from qgis.core import Qgis, QgsPointXY
+from qgis.core import Qgis, QgsPointXY, QgsLineString, QgsMultiPolygon, QgsPolygon, QgsGeometry, QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject
+from qgis.gui import QgsRubberBand
 import dateutil.parser
 from dateutil.tz import tzlocal
 from dateutil.relativedelta import relativedelta
@@ -47,6 +48,12 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         self.canvas = iface.mapCanvas()
         self.savedMapTool = None
         self.g = pyproj.Geod(ellps='WGS84')
+        
+        # Set up a polygon rubber band
+        self.rubber = QgsRubberBand(self.canvas)
+        self.rubber.setColor(QColor(255, 70, 0, 200))
+        self.rubber.setWidth(3)
+        self.rubber.setBrushStyle(Qt.NoBrush)
         
         self.tf = TimezoneFinder(bin_file_location=os.path.join(os.path.dirname(__file__), 'libs/timezonefinder'))
         self.timeEdit.setDisplayFormat("HH:mm:ss")
@@ -106,6 +113,7 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         if self.savedMapTool:
             self.canvas.setMapTool(self.savedMapTool)
             self.savedMapTool = None
+        self.rubber.reset()
         
     def initSystemTime(self):
         self.tz = tzlocal()
@@ -154,6 +162,18 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
 
     def setCoordinateTimezone(self, lat, lon):
             tzname = self.tf.certain_timezone_at(lng=lon, lat=lat)
+            if tzname != None:
+                polygon = self.tf.get_geometry(tz_name=tzname)
+                qgs_poly = tzf_to_qgis_polygon(polygon)
+                epsg4326 = QgsCoordinateReferenceSystem("EPSG:4326")
+                canvas_crs = self.canvas.mapSettings().destinationCrs()
+                if epsg4326 != canvas_crs:
+                    to_canvas_crs = QgsCoordinateTransform(epsg4326, canvas_crs, QgsProject.instance())
+                    qgs_poly.transform(to_canvas_crs)
+                self.rubber.reset()
+                self.rubber.addGeometry(qgs_poly, None)
+                self.rubber.show()
+                
             # print('tzname {}'.format(tzname))
             if tzname:
                 self.tz = timezone(tzname)
@@ -453,3 +473,21 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         s = self.sunElevationLineEdit.text().strip()
         self.clipboard.setText(s)
         self.iface.messageBar().pushMessage("", "{} copied to the clipboard".format(s), level=Qgis.Info, duration=3)
+
+def tzf_to_qgis_polygon(tzdata):
+    if not tzdata or len(tzdata) < 1:
+        return None
+    multi_poly = QgsMultiPolygon()
+    for tzpoly in tzdata:
+        holes = []
+        poly = QgsPolygon()
+        for x, part in enumerate(tzpoly):
+            if x == 0:
+                outer_ls = QgsLineString(part[0], part[1])
+                poly.setExteriorRing(outer_ls)
+            else:
+                hole_ls = QgsLineString(part[0], part[1])
+                holes.append(hole_ls)
+        poly.setInteriorRings(holes)
+        multi_poly.addGeometry(poly)
+    return(QgsGeometry(multi_poly))
