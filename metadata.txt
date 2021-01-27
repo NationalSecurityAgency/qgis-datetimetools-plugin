@@ -14,7 +14,6 @@ category=Plugins
 icon=icons/dateTime.png
 experimental=False
 deprecated=False
-plugin_dependencies=scipy
 changelog=
     3.0.1 - Shoe time zone polygon
     3.0.0 - First release
