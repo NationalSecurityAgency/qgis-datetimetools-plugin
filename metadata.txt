@@ -2,7 +2,7 @@
 name=Date/Time Tools
 qgisMinimumVersion=3.4
 description=Conversion tools to display the local date, time, time zone, convert between UNIX time (Epoch), Julian dates, ISO8601, calculate the difference between two dates, select a location and time zone by clicking on the map and display the closet location and sun statistics. 
-version=3.0.1
+version=3.0.2
 author=C Hamilton
 email=adenaculture@gmail.com
 about=Conversion tools to display the local date, time, time zone, convert between UNIX time (Epoch), Julian dates, ISO8601, calculate the difference between two dates, select a location and time zone by clicking on the map and display the closet location and sun statistics.
@@ -15,5 +15,6 @@ icon=icons/dateTime.png
 experimental=False
 deprecated=False
 changelog=
-    3.0.1 - Shoe time zone polygon
+    3.0.2 - Bug fix
+    3.0.1 - Show time zone polygon
     3.0.0 - First release

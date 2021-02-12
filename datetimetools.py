@@ -17,7 +17,7 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QUrl
+from qgis.PyQt.QtCore import QUrl, Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsApplication
@@ -57,4 +57,5 @@ class DateTimeTools(object):
             from .conversionDialog import ConversionDialog
             self.conversionDialog = ConversionDialog(self.iface, self.iface.mainWindow())
             self.conversionDialog.setFloating(True)
+            # self.iface.addDockWidget(Qt.RightDockWidgetArea, self.conversionDialog)
         self.conversionDialog.show()

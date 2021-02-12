@@ -159,6 +159,7 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
     def stopCapture(self):
         # print('stopCapture')
         self.coordCaptureButton.setChecked(False)
+        self.rubber.reset()
 
     def setCoordinateTimezone(self, lat, lon):
             tzname = self.tf.certain_timezone_at(lng=lon, lat=lat)
