@@ -34,7 +34,7 @@ class DateTimeTools(object):
 
     def initGui(self):
         """Create the menu & tool bar items within QGIS"""
-        icon = QIcon(os.path.dirname(__file__) + "/images/dateTime.png")
+        icon = QIcon(os.path.dirname(__file__) + "/images/dateTime.svg")
         self.conversionAction = QAction(icon, "Date/Time Conversion", self.iface.mainWindow())
         self.conversionAction.triggered.connect(self.showConversionDialog)
         self.conversionAction.setCheckable(False)

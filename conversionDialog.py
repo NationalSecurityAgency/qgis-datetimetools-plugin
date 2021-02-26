@@ -74,10 +74,10 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         self.timezoneComboBox.currentIndexChanged.connect(self.timezone_changed)
         
         self.dateEdit.setCalendarPopup(True)
-        self.coordCaptureButton.setIcon(QIcon(os.path.dirname(__file__) + "/images/coordinate_capture.png"))
-        self.currentDateTimeButton.setIcon(QIcon(os.path.dirname(__file__) + "/images/dateTime.png"))
+        self.coordCaptureButton.setIcon(QIcon(os.path.dirname(__file__) + "/images/coordCapture.svg"))
+        self.currentDateTimeButton.setIcon(QIcon(os.path.dirname(__file__) + "/images/dateTime.svg"))
 
-        icon = QIcon(os.path.dirname(__file__) + "/images/check.png")
+        icon = QIcon(':/images/themes/default/algorithms/mAlgorithmCheckGeometry.svg')
         self.epochCommitButton.setIcon(icon)
         self.epochmsCommitButton.setIcon(icon)
         self.julianCommitButton.setIcon(icon)
