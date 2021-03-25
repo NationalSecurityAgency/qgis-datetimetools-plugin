@@ -21,35 +21,74 @@ from qgis.PyQt.QtCore import QUrl, Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsApplication
+import processing
+from .provider import DateTimeToolsProvider
 
 import os
 
 class DateTimeTools(object):
+    captureTzTool = None
     def __init__(self, iface):
         self.iface = iface
         self.canvas = iface.mapCanvas()
         self.conversionDialog = None
         self.toolbar = self.iface.addToolBar('Date/Time Tools Toolbar')
         self.toolbar.setObjectName('DateTimeToolsToolbar')
+        self.provider = DateTimeToolsProvider()
 
     def initGui(self):
         """Create the menu & tool bar items within QGIS"""
-        icon = QIcon(os.path.dirname(__file__) + "/images/dateTime.svg")
+        icon = QIcon(os.path.dirname(__file__) + "/images/DateTime.svg")
         self.conversionAction = QAction(icon, "Date/Time Conversion", self.iface.mainWindow())
         self.conversionAction.triggered.connect(self.showConversionDialog)
         self.conversionAction.setCheckable(False)
         self.iface.addPluginToMenu("Date/Time Tools", self.conversionAction)
         self.toolbar.addAction(self.conversionAction)
 
+        # Add Interface for Time Zone Capturing
+        icon = QIcon(os.path.dirname(__file__) + "/images/tzCapture.svg")
+        self.copyTZAction = QAction(icon, "Copy/Display Time Zone", self.iface.mainWindow())
+        self.copyTZAction.setObjectName('latLonToolsCopy')
+        self.copyTZAction.triggered.connect(self.startTZCapture)
+        self.copyTZAction.setCheckable(True)
+        self.toolbar.addAction(self.copyTZAction)
+        self.iface.addPluginToMenu("Date/Time Tools", self.copyTZAction)
+
+        self.addTZAction = QAction('Add time zone attributes', self.iface.mainWindow())
+        self.addTZAction.triggered.connect(self.addTimeZoneAttributes)
+        self.iface.addPluginToMenu('Date/Time Tools', self.addTZAction)
+        
+        self.canvas.mapToolSet.connect(self.resetTools)
+
+        # Add the processing provider
+        QgsApplication.processingRegistry().addProvider(self.provider)
+
     def unload(self):
         """Remove the plugin menu item and icon from QGIS GUI."""
         self.iface.removePluginMenu('Date/Time Tools', self.conversionAction)
         self.iface.removeToolBarIcon(self.conversionAction)
+        self.iface.removePluginMenu('Date/Time Tools', self.copyTZAction)
+        self.iface.removeToolBarIcon(self.copyTZAction)
+        self.iface.removePluginMenu('Date/Time Tools', self.addTZAction)
         del self.toolbar
         if self.conversionDialog:
             self.iface.removeDockWidget(self.conversionDialog)
-            conversionDialog = None
+            self.conversionDialog = None
+        self.captureTzTool = None
+        QgsApplication.processingRegistry().removeProvider(self.provider)
             
+    def resetTools(self, newtool, oldtool):
+        '''Uncheck the Copy Lat Lon tool'''
+        try:
+            if self.captureTzTool and (oldtool is self.captureTzTool):
+                self.copyTZAction.setChecked(False)
+            if newtool is self.captureTzTool:
+                self.copyTZAction.setChecked(True)
+        except Exception:
+            pass
+
+    def addTimeZoneAttributes(self):
+        processing.execAlgorithmDialog('datetimetools:addtimezoneattributes', {})
 
     def showConversionDialog(self):
         """Display the KML Dialog window."""
@@ -59,3 +98,11 @@ class DateTimeTools(object):
             self.conversionDialog.setFloating(True)
             # self.iface.addDockWidget(Qt.RightDockWidgetArea, self.conversionDialog)
         self.conversionDialog.show()
+
+    def startTZCapture(self):
+        if self.captureTzTool is None:
+            from .copyTimezoneTool import CopyTimeZoneTool
+            self.captureTzTool = CopyTimeZoneTool(self.iface)
+        self.canvas.setMapTool(self.captureTzTool)
+
+

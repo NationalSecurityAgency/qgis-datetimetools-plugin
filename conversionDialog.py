@@ -13,12 +13,12 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime, MINYEAR
 from pytz import all_timezones, timezone
 import pytz
+from .settings import epsg4326, tzf_instance
 from .jdcal import MJD_0, gcal2jd, jd2gcal
-from timezonefinder import TimezoneFinder
 from astral.sun import sun
 import astral
 import reverse_geocoder as rg
-import pyproj
+from geographiclib.geodesic import Geodesic
 from .captureCoordinate import CaptureCoordinate
 from .wintz import win_tz_map
 from .util import parseDMSString
@@ -39,6 +39,8 @@ class Update(enum.Enum):
     TIME_ZONE = 5
     JULIAN = 6
 
+geod = Geodesic.WGS84
+
 DOW = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 class ConversionDialog(QDockWidget, FORM_CLASS):
     def __init__(self, iface, parent):
@@ -47,7 +49,6 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         self.iface = iface
         self.canvas = iface.mapCanvas()
         self.savedMapTool = None
-        self.g = pyproj.Geod(ellps='WGS84')
         
         # Set up a polygon rubber band
         self.rubber = QgsRubberBand(self.canvas)
@@ -55,7 +56,7 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         self.rubber.setWidth(3)
         self.rubber.setBrushStyle(Qt.NoBrush)
         
-        self.tf = TimezoneFinder(bin_file_location=os.path.join(os.path.dirname(__file__), 'libs/timezonefinder'))
+        self.tf = tzf_instance.getTZF()
         self.timeEdit.setDisplayFormat("HH:mm:ss")
 
         self.clipboard = QApplication.clipboard()
@@ -75,7 +76,7 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         
         self.dateEdit.setCalendarPopup(True)
         self.coordCaptureButton.setIcon(QIcon(os.path.dirname(__file__) + "/images/coordCapture.svg"))
-        self.currentDateTimeButton.setIcon(QIcon(os.path.dirname(__file__) + "/images/dateTime.svg"))
+        self.currentDateTimeButton.setIcon(QIcon(os.path.dirname(__file__) + "/images/CurrentTime.png"))
 
         icon = QIcon(':/images/themes/default/algorithms/mAlgorithmCheckGeometry.svg')
         self.epochCommitButton.setIcon(icon)
@@ -162,11 +163,10 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         self.rubber.reset()
 
     def setCoordinateTimezone(self, lat, lon):
-            tzname = self.tf.certain_timezone_at(lng=lon, lat=lat)
+            tzname = self.tf.timezone_at(lng=lon, lat=lat)
             if tzname != None:
                 polygon = self.tf.get_geometry(tz_name=tzname)
                 qgs_poly = tzf_to_qgis_polygon(polygon)
-                epsg4326 = QgsCoordinateReferenceSystem("EPSG:4326")
                 canvas_crs = self.canvas.mapSettings().destinationCrs()
                 if epsg4326 != canvas_crs:
                     to_canvas_crs = QgsCoordinateTransform(epsg4326, canvas_crs, QgsProject.instance())
@@ -290,12 +290,13 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         self.reverseGeoLinedit.setText(str)
         
         # Get the azimuth and distance to the nearest know location
-        azdist = self.g.inv(lon, lat, float(results[0]['lon']),float(results[0]['lat']))
-        heading = azdist[0] % 360
+        l = geod.Inverse(lat, lon, float(results[0]['lat']), float(results[0]['lon']))
+        heading = l['azi1']
+        dist = l['s12'] / 1000.0 # put it in kilometers
         str = '{} {:.1f}° / {:.1f} km'.format(
             results[0]['name'],
             heading,
-            azdist[2] / 1000.0)
+            dist)
         self.headingDistLineEdit.setText(str)
 
     def clearReverseGeo(self):

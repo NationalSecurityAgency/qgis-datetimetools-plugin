@@ -4,7 +4,7 @@ from qgis.PyQt.QtCore import pyqtSlot
 from qgis.core import QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsPointXY, QgsProject, QgsSettings
 from qgis.gui import QgsMapToolEmitPoint, QgsVertexMarker
 
-epsg4326 = QgsCoordinateReferenceSystem('EPSG:4326')
+from .settings import epsg4326
 
 class CaptureCoordinate(QgsMapToolEmitPoint):
     '''Class to interact with the map canvas to capture the coordinate
@@ -40,11 +40,6 @@ class CaptureCoordinate(QgsMapToolEmitPoint):
         else:
             self.removeVertexMarker()
             return self.toMapCoordinates(qpoint) # QPoint input, returns QgsPointXY
-
-    def canvasMoveEvent(self, event):
-        '''Capture the coordinate as the user moves the mouse over
-        the canvas.'''
-        self.snappoint(event.originalPixelPoint()) # input is QPoint
 
     def canvasReleaseEvent(self, event):
         '''Capture the coordinate when the mouse button has been released,

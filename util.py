@@ -2,8 +2,6 @@ import math
 import re
 from qgis.core import QgsCoordinateReferenceSystem
 
-epsg4326 = QgsCoordinateReferenceSystem('EPSG:4326')
-
 def formatDmsString(lat, lon, dms_mode=0, prec=0, order=0, delimiter=', ', useDmsSpace=True, padZeros=False):
     '''Return a DMS formated string.'''
     if order == 0:  # Y, X or Lat, Lon
