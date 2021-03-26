@@ -23,7 +23,7 @@ from .captureCoordinate import CaptureCoordinate
 from .wintz import win_tz_map
 from .util import parseDMSString
 
-import traceback
+# import traceback
 
 FORM_CLASS, _ = loadUiType(os.path.join(
     os.path.dirname(__file__), 'ui/dateTimeConverter.ui'))

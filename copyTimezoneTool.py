@@ -3,6 +3,9 @@ from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import Qgis, QgsCoordinateTransform, QgsPointXY, QgsProject, QgsSettings, QgsPolygon, QgsMultiPolygon, QgsLineString, QgsGeometry
 from qgis.gui import QgsMapToolEmitPoint, QgsVertexMarker, QgsRubberBand
+from datetime import datetime
+from pytz import timezone
+import pytz
 
 from .settings import epsg4326, tzf_instance
 # import traceback
@@ -14,9 +17,10 @@ class CopyTimeZoneTool(QgsMapToolEmitPoint):
     tzf = None
     last_tz = None
 
-    def __init__(self, iface):
+    def __init__(self, settings, iface):
         QgsMapToolEmitPoint.__init__(self, iface.mapCanvas())
         self.iface = iface
+        self.settings = settings
         self.canvas = iface.mapCanvas()
 
         # Set up a polygon rubber band
@@ -29,6 +33,7 @@ class CopyTimeZoneTool(QgsMapToolEmitPoint):
         '''When activated set the cursor to a crosshair.'''
         self.canvas.setCursor(Qt.CrossCursor)
         self.tzf = tzf_instance.getTZF()
+        self.settings.show()
 
     def deactivate(self):
         self.last_tz = None
@@ -44,26 +49,40 @@ class CopyTimeZoneTool(QgsMapToolEmitPoint):
         else:
             transform = QgsCoordinateTransform(canvasCRS, epsg4326, QgsProject.instance())
             pt4326 = transform.transform(pt.x(), pt.y())
-        print('x {} y {}'.format(pt4326.x(), pt4326.y()))
         try:
-            msg = self.tzf.timezone_at(lng=pt4326.x(), lat=pt4326.y())
+            tz_name = self.tzf.timezone_at(lng=pt4326.x(), lat=pt4326.y())
+            mode = self.settings.mode()
+            if mode == 1:
+                msg = tz_name
+            else:
+                tz = timezone(tz_name)
+                date = self.settings.date()
+                loc_dt = tz.localize(datetime(date.year(), date.month(), date.day()))
+                offset = loc_dt.strftime('%z')
+                if mode == 0:
+                    msg = '{} ({})'.format(tz_name, offset)
+                else:
+                    msg = offset
         except Exception:
+            # traceback.print_exc()
             msg = ''
+            tz_name = ''
         if not msg:
             msg = ''
+            tz_name = ''
 
-        return msg
+        return (tz_name, msg)
 
     def canvasMoveEvent(self, event):
         '''Capture the coordinate as the user moves the mouse over
         the canvas. Show it in the status bar.'''
         pt = event.mapPoint()
-        msg = self.formatMessage(pt)
-        if msg != self.last_tz:
+        tz_name, msg = self.formatMessage(pt)
+        if tz_name != self.last_tz:
             self.rubber.reset()
-            self.last_tz = msg
-            if msg != '':
-                polygon = self.tzf.get_geometry(tz_name=msg)
+            self.last_tz = tz_name
+            if tz_name != '':
+                polygon = self.tzf.get_geometry(tz_name=tz_name)
                 qgs_poly = tzf_to_qgis_polygon(polygon)
                 canvasCRS = self.canvas.mapSettings().destinationCrs()
                 if epsg4326 != canvasCRS:
@@ -78,7 +97,7 @@ class CopyTimeZoneTool(QgsMapToolEmitPoint):
         format it, and copy it to the clipboard. pt is QgsPointXY'''
         pt = event.mapPoint()
 
-        msg = self.formatMessage(pt)
+        tz_name, msg = self.formatMessage(pt)
         if msg:
             clipboard = QApplication.clipboard()
             clipboard.setText(msg)

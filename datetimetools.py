@@ -28,6 +28,7 @@ import os
 
 class DateTimeTools(object):
     captureTzTool = None
+    copyModeSettings = None
     def __init__(self, iface):
         self.iface = iface
         self.canvas = iface.mapCanvas()
@@ -76,6 +77,9 @@ class DateTimeTools(object):
             self.conversionDialog = None
         self.captureTzTool = None
         QgsApplication.processingRegistry().removeProvider(self.provider)
+        if self.copyModeSettings:
+            self.iface.removeDockWidget(self.copyModeSettings)
+        self.copyModeSettings = None
             
     def resetTools(self, newtool, oldtool):
         '''Uncheck the Copy Lat Lon tool'''
@@ -100,9 +104,13 @@ class DateTimeTools(object):
         self.conversionDialog.show()
 
     def startTZCapture(self):
+        if self.copyModeSettings is None:
+            from .copyModeSettings import CopyModeSettings
+            self.copyModeSettings = CopyModeSettings(self.iface, self.iface.mainWindow())
+            self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.copyModeSettings)
         if self.captureTzTool is None:
             from .copyTimezoneTool import CopyTimeZoneTool
-            self.captureTzTool = CopyTimeZoneTool(self.iface)
+            self.captureTzTool = CopyTimeZoneTool(self.copyModeSettings, self.iface)
         self.canvas.setMapTool(self.captureTzTool)
 
 
