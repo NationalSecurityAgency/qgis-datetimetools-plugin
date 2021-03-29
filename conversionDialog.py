@@ -192,7 +192,8 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         else:
             self.timeEdit.setDisplayFormat("hh:mm:ss AP")
         dt = self.getLocalDateTime()
-        offset = int(dt.tzinfo.utcoffset(dt).total_seconds()/3600.0)
+        # offset = int(dt.tzinfo.utcoffset(dt).total_seconds()/3600.0)
+        offset = dt.strftime('%z')
         if id != Update.DATE:
             self.dateEdit.blockSignals(True)
             self.dateEdit.setDate(QDate(dt.year, dt.month, dt.day))
@@ -234,7 +235,8 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         self.dayOfWeekLineEdit.setText(DOW[tinfo.tm_wday])
         self.doyLineEdit.setText('{}'.format(tinfo.tm_yday))
 
-        self.timezoneOffsetLineEdit.setText('{:+d}'.format(offset))
+        # self.timezoneOffsetLineEdit.setText('{:+d}'.format(offset))
+        self.timezoneOffsetLineEdit.setText(offset)
         
         self.updateTimeDelta()
         self.updateSunMoon()
