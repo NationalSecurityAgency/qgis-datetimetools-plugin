@@ -1,6 +1,7 @@
 # Date/Time Tools Plugin
 
 The QGIS Date/Time Tools plugin provides four tools to manipulate date, time, time zones, and times of the sun. These are the four tools.
+
 * <img src="images/DateTime.svg" width=24 height=24 alt="Date/Time Conversion"> ***Date/Time Conversion*** - This is a dialog box that displays different formats of a date and time, computes time differences, and displays various sun times such as dawn, sunrise, noon, sunset, and dusk.
 * <img src="images/tzCapture.svg" width=24 height=24 alt="Time zone capture"> ***Time Zone Capture*** - With this tool selected, as the mouse moves across the canvas the time zone and/or time offset is display in the lower left info box and the time zone is highlighted on the canvas.
 * <img src="images/sun.svg" width=24 height=24 alt="Add Sun Attributes"> ***Add Sun Attributes*** - This is a processing tool that for a point layer and a given date, calculates the time of dawn, sunrise, noon, sunset, and dusk and adds them to the attribute table and creates a new layer.
