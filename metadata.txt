@@ -1,21 +1,21 @@
 [general]
 name=Date/Time Tools
-qgisMinimumVersion=3.4
-description=Conversion tools to display the local date, time, time zone, convert between UNIX time (Epoch), Julian dates, ISO8601, calculate the difference between two dates, select a location and time zone by clicking on the map and display the closet location and sun statistics. 
+qgisMinimumVersion=3.14
+description=Conversion tools to display the local date, time, time zone, convert between UNIX time (Epoch), Julian dates, ISO8601, calculate the difference between two dates, select a location and time zone by clicking on the map and display the closet location and sun statistics. It includes an additional time zone and/or offset capture tool, processing tools to add sun parameters, or time zone and offset to a point layer attribute table.
 version=3.0.4
 author=C Hamilton
 email=adenaculture@gmail.com
-about=Conversion tools to display the local date, time, time zone, convert between UNIX time (Epoch), Julian dates, ISO8601, calculate the difference between two dates, select a location and time zone by clicking on the map and display the closet location and sun statistics. A processing tool that adds a time zone field and options time zone offset to a point layer.
+about=This is a set of four tools. 1)Conversion tools to display the local date, time, time zone, convert between UNIX time (Epoch), Julian dates, ISO8601, calculate the difference between two dates, select a location and time zone by clicking on the map and display the closet location and sun statistics. 2) A time zone and/or offset capture tool. 3) A processing tool that adds a time zone field and/or offset to a point layer. 4) a processing tool to add the sun times of dawn, sunrise, noon, sunset, and dusk to a point layer attribute table.
 tracker=https://github.com/NationalSecurityAgency/qgis-datetimetools-plugin/issues
 repository=https://github.com/NationalSecurityAgency/qgis-datetimetools-plugin
-tags=time,conversion,sun,moon
+tags=time,conversion,sun,moon,date,time zone,dawn
 homepage=https://github.com/NationalSecurityAgency/qgis-datetimetools-plugin
 category=Plugins
 icon=icon.png
 experimental=False
 deprecated=False
 changelog=
-    3.0.4 - Added tools
+    3.0.4 - Added 3 more tools
     3.0.3 - Use SVG icons
     3.0.2 - Bug fix
     3.0.1 - Show time zone polygon
