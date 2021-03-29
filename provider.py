@@ -2,7 +2,7 @@ import os
 from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 from .addtimezone import AddTimezoneAlgorithm
-
+from .addastronomical import AddAstronomicalAlgorithm
 
 class DateTimeToolsProvider(QgsProcessingProvider):
 
@@ -10,6 +10,7 @@ class DateTimeToolsProvider(QgsProcessingProvider):
         QgsProcessingProvider.unload(self)
 
     def loadAlgorithms(self):
+        self.addAlgorithm(AddAstronomicalAlgorithm())
         self.addAlgorithm(AddTimezoneAlgorithm())
 
     def icon(self):

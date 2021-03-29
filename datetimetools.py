@@ -49,16 +49,29 @@ class DateTimeTools(object):
         # Add Interface for Time Zone Capturing
         icon = QIcon(os.path.dirname(__file__) + "/images/tzCapture.svg")
         self.copyTZAction = QAction(icon, "Copy/Display Time Zone", self.iface.mainWindow())
-        self.copyTZAction.setObjectName('latLonToolsCopy')
         self.copyTZAction.triggered.connect(self.startTZCapture)
         self.copyTZAction.setCheckable(True)
         self.toolbar.addAction(self.copyTZAction)
         self.iface.addPluginToMenu("Date/Time Tools", self.copyTZAction)
 
-        self.addTZAction = QAction('Add time zone attributes', self.iface.mainWindow())
+        icon = QIcon(os.path.dirname(__file__) + "/images/sun.svg")
+        self.addSunAction = QAction(icon, 'Add sun attributes', self.iface.mainWindow())
+        self.addSunAction.triggered.connect(self.addSunAttributes)
+        self.toolbar.addAction(self.addSunAction)
+        self.iface.addPluginToMenu('Date/Time Tools', self.addSunAction)
+
+        icon = QIcon(os.path.dirname(__file__) + "/images/tzAttributes.svg")
+        self.addTZAction = QAction(icon, 'Add time zone attributes', self.iface.mainWindow())
         self.addTZAction.triggered.connect(self.addTimeZoneAttributes)
+        self.toolbar.addAction(self.addTZAction)
         self.iface.addPluginToMenu('Date/Time Tools', self.addTZAction)
         
+        # Help
+        icon = QIcon(os.path.dirname(__file__) + '/images/help.svg')
+        self.helpAction = QAction(icon, "Help", self.iface.mainWindow())
+        self.helpAction.triggered.connect(self.help)
+        self.iface.addPluginToMenu('Date/Time Tools', self.helpAction)
+
         self.canvas.mapToolSet.connect(self.resetTools)
 
         # Add the processing provider
@@ -70,7 +83,10 @@ class DateTimeTools(object):
         self.iface.removeToolBarIcon(self.conversionAction)
         self.iface.removePluginMenu('Date/Time Tools', self.copyTZAction)
         self.iface.removeToolBarIcon(self.copyTZAction)
+        self.iface.removePluginMenu('Date/Time Tools', self.addSunAction)
+        self.iface.removeToolBarIcon(self.addSunAction)
         self.iface.removePluginMenu('Date/Time Tools', self.addTZAction)
+        self.iface.removeToolBarIcon(self.addTZAction)
         del self.toolbar
         if self.conversionDialog:
             self.iface.removeDockWidget(self.conversionDialog)
@@ -90,6 +106,9 @@ class DateTimeTools(object):
                 self.copyTZAction.setChecked(True)
         except Exception:
             pass
+
+    def addSunAttributes(self):
+        processing.execAlgorithmDialog('datetimetools:addsunattributes', {})
 
     def addTimeZoneAttributes(self):
         processing.execAlgorithmDialog('datetimetools:addtimezoneattributes', {})
@@ -112,5 +131,11 @@ class DateTimeTools(object):
             from .copyTimezoneTool import CopyTimeZoneTool
             self.captureTzTool = CopyTimeZoneTool(self.copyModeSettings, self.iface)
         self.canvas.setMapTool(self.captureTzTool)
+
+    def help(self):
+        '''Display a help page'''
+        import webbrowser
+        url = QUrl.fromLocalFile(os.path.dirname(__file__) + "/index.html").toString()
+        webbrowser.open(url, new=2)
 
 

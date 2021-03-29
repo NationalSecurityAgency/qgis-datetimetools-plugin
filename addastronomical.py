@@ -1,8 +1,9 @@
 import os
-import math
 from datetime import datetime
 from pytz import timezone
 import pytz
+from astral.sun import sun
+import astral
 
 from qgis.core import (
     QgsPointXY, QgsFeature, QgsGeometry, QgsField,
@@ -22,15 +23,16 @@ from qgis.PyQt.QtCore import QVariant, QUrl
 
 from .settings import epsg4326, tzf_instance
 
-class AddTimezoneAlgorithm(QgsProcessingAlgorithm):
+class AddAstronomicalAlgorithm(QgsProcessingAlgorithm):
     """
     Algorithm to time zone attribute.
     """
 
     PrmInputLayer = 'InputLayer'
+    PrmUseUTC = 'UseUTC'
     PrmOutputLayer = 'OutputLayer'
     PrmDate = 'Date'
-    PrmAddOffset = 'AddOffset'
+    PrmUseISO = 'UseISO'
 
     def initAlgorithm(self, config):
         self.addParameter(
@@ -41,17 +43,24 @@ class AddTimezoneAlgorithm(QgsProcessingAlgorithm):
         )
         self.addParameter(
             QgsProcessingParameterBoolean(
-                self.PrmAddOffset,
-                'Add optional time zone offset for a particular date',
+                self.PrmUseUTC,
+                'Use UTC for date and time',
+                True,
+                optional=True)
+        )
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.PrmUseISO,
+                'Use ISO8601 timestamps',
                 False,
                 optional=True)
         )
         self.addParameter(
             QgsProcessingParameterDateTime(
                 self.PrmDate,
-                'Select date for time zone offset calculation',
+                'Select date for solar calculations',
                 type=QgsProcessingParameterDateTime.Date,
-                optional=True,
+                optional=False,
                 )
         )
         self.addParameter(
@@ -62,19 +71,26 @@ class AddTimezoneAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
         source = self.parameterAsSource(parameters, self.PrmInputLayer, context)
-        add_offset = self.parameterAsBool(parameters, self.PrmAddOffset, context)
+        use_utc = self.parameterAsBool(parameters, self.PrmUseUTC, context)
+        use_iso = self.parameterAsBool(parameters, self.PrmUseISO, context)
         dt = self.parameterAsDateTime(parameters, self.PrmDate, context)
         qdate = dt.date()
-        if add_offset and not qdate.isValid():
+        if not qdate.isValid():
             raise QgsProcessingException('Use a proper date and rerun algorithm')
+        date = datetime(qdate.year(), qdate.month(), qdate.day())
         
         fields = source.fields()
         src_crs = source.sourceCrs()
-        if fields.append(QgsField("tzid", QVariant.String)) is False:
-            raise QgsProcessingException("Field names must be unique. There is already a field named 'tzid'")
-        if add_offset:
-            if fields.append(QgsField("tz_offset", QVariant.String)) is False:
-                raise QgsProcessingException("Field names must be unique. There is already a field named 'tz_offset'")
+        if fields.append(QgsField("dawn", QVariant.String)) is False:
+            raise QgsProcessingException("Field names must be unique. There is already a field named 'dawn'")
+        if fields.append(QgsField("sunrise", QVariant.String)) is False:
+            raise QgsProcessingException("Field names must be unique. There is already a field named 'sunrise'")
+        if fields.append(QgsField("noon", QVariant.String)) is False:
+            raise QgsProcessingException("Field names must be unique. There is already a field named 'noon'")
+        if fields.append(QgsField("sunset", QVariant.String)) is False:
+            raise QgsProcessingException("Field names must be unique. There is already a field named 'sunset'")
+        if fields.append(QgsField("dusk", QVariant.String)) is False:
+            raise QgsProcessingException("Field names must be unique. There is already a field named 'dusk'")
 
         (sink, dest_id) = self.parameterAsSink(
             parameters, self.PrmOutputLayer, context, fields,
@@ -82,8 +98,14 @@ class AddTimezoneAlgorithm(QgsProcessingAlgorithm):
 
         if src_crs != epsg4326:
             transform = QgsCoordinateTransform(src_crs, epsg4326, QgsProject.instance())
+        if use_iso:
+            if use_utc:
+                fmt = '%Y-%m-%dT%H:%M:%SZ'
+            else:
+                fmt = '%Y-%m-%dT%H:%M:%S%z'
+        else:
+            fmt = '%Y-%m-%d %H:%M:%S %Z%z'
         tzf = tzf_instance.getTZF()
-        date = datetime(qdate.year(), qdate.month(), qdate.day())
         total = 100.0 / source.featureCount() if source.featureCount() else 0
 
         iterator = source.getFeatures()
@@ -95,22 +117,28 @@ class AddTimezoneAlgorithm(QgsProcessingAlgorithm):
             pt = feature.geometry().asPoint()
             if src_crs != epsg4326:
                 pt = transform.transform(pt)
+            
             try:
-                msg = tzf.timezone_at(lng=pt.x(), lat=pt.y())
-            except Exception:
-                msg = None
-            if not msg:
-                msg = ''
-            if add_offset:
-                if msg:
-                    tz = timezone(msg)
-                    loc_dt = tz.localize(date)
-                    offset = loc_dt.strftime('%z')
+                locl = astral.LocationInfo('','','',pt.y(), pt.x())
+                if use_utc:
+                    s = sun(locl.observer, date=date)
                 else:
-                    offset = ''
-                f.setAttributes(feature.attributes() + [msg, offset])
-            else:
-                f.setAttributes(feature.attributes() + [msg])
+                    tz_name = tzf.timezone_at(lng=pt.x(), lat=pt.y())
+                    tz = timezone(tz_name)
+                    loc_dt = tz.localize(date)
+                    s = sun(locl.observer, date=date, tzinfo=loc_dt.tzinfo)
+                dawn = s["dawn"].strftime(fmt)
+                sunrise = s["sunrise"].strftime(fmt)
+                noon = s["noon"].strftime(fmt)
+                sunset = s["sunset"].strftime(fmt)
+                dusk = s["dusk"].strftime(fmt)
+            except Exception:
+                dawn = ""
+                sunrise = ""
+                noon = ""
+                sunset = ""
+                dusk = ""
+            f.setAttributes(feature.attributes() + [dawn, sunrise, noon, sunset, dusk])
             sink.addFeature(f)
 
             if cnt % 100 == 0:
@@ -119,13 +147,13 @@ class AddTimezoneAlgorithm(QgsProcessingAlgorithm):
         return {self.PrmOutputLayer: dest_id}
 
     def name(self):
-        return 'addtimezoneattributes'
-
-    def icon(self):
-        return QIcon(os.path.join(os.path.dirname(__file__), 'images/tzAttributes.svg'))
+        return 'addsunattributes'
 
     def displayName(self):
-        return 'Add time zone attributes'
+        return 'Add sun attributes'
+
+    def icon(self):
+        return QIcon(os.path.dirname(__file__) + '/images/sun.svg')
 
     def helpUrl(self):
         file = os.path.dirname(__file__) + '/index.html'
@@ -134,4 +162,4 @@ class AddTimezoneAlgorithm(QgsProcessingAlgorithm):
         return QUrl.fromLocalFile(file).toString(QUrl.FullyEncoded)
 
     def createInstance(self):
-        return AddTimezoneAlgorithm()
+        return AddAstronomicalAlgorithm()
