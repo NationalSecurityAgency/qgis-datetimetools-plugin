@@ -87,6 +87,7 @@ class DateTimeTools(object):
         self.iface.removeToolBarIcon(self.addSunAction)
         self.iface.removePluginMenu('Date/Time Tools', self.addTZAction)
         self.iface.removeToolBarIcon(self.addTZAction)
+        self.iface.removePluginMenu('Date/Time Tools', self.helpAction)
         del self.toolbar
         if self.conversionDialog:
             self.iface.removeDockWidget(self.conversionDialog)
