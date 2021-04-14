@@ -8,7 +8,7 @@ The QGIS Date/Time Tools plugin provides four tools to manipulate date, time, ti
 * <img src="images/tzAttributes.svg" width=24 height=24 alt="Add Sun Attributes"> ***Add Time Zone Attributes*** - From a point layer, this processing algorithm adds the time zone each point is in as well as the time zone offset for a particular date if selected. 
 
 ## <img src="images/DateTime.svg" width=24 height=24 alt="Date/Time Conversion"> Date/Time Conversions
-The Date/Time conversion panel provides date and time conversions between various formats and time zones. Formats include ISO8601 dates and times, Julian dates, and Unix timestamps (Epoch). It can calculate the difference between two different dates. It provides the ability to select a time zone from a list or by clicking on the map.
+The Date/Time conversion panel provides date and time conversions between various formats and time zones. Formats include ISO8601 dates and times, Julian dates, and Unix timestamps (Epoch). It displays the weekday and day of the year. It calculates the difference between two different dates. It provides the ability to select a time zone from a list or by clicking on the map. When a coordinate is specified, a reverse geocoder finds the closest location to the point with a heading and distance. Sun times of dawn, sunrise, noon, sunset, and dusk are calculated for the specified date.
 
 <div style="text-align:center"><img src="doc/datetimeconversion.jpg" alt="Date/Time Conversion"></div>
 
@@ -20,14 +20,14 @@ The Date/Time conversion panel provides date and time conversions between variou
 A second date and time can be entered for ISO8601_2 in order to calculate the difference between it and ISO8601_1. Once a latitude and longitude has been specified, information about solar times of dawn, sunrise, noon, sunset, and dusk will be displayed as well as the sun azimuth/direction and elevation from the horizon.
 
 ## <img src="images/tzCapture.svg" width=24 height=24 alt="Time zone capture"> Time Zone Capture
-With this tool selected, as the mouse moves across the canvas the time zone and/or time offset is display in the lower left info box and the time zone is highlighted on the canvas.
+With this tool selected, as the mouse moves across the canvas, the time zone and/or time offset is display in the lower left info box and the time zone is highlighted on the canvas.
 
 <div style="text-align:center"><img src="doc/timezonecapture.png" alt="Time zone capture"></div>
 
 When this tool is activated a settings dialog box is displayed. Here you can choose whether to diplays just the time zone, time zone offset, or both the time zone and it's offset. The time zone offset requires a date to be specified. Clicking on the map copies this information to the clipboard.
 
 ## <img src="images/sun.svg" width=24 height=24 alt="Add Sun Attributes"> Add Sun Attributes
-This is a processing tool that for a point layer and a given date, calculates the time of dawn, sunrise, noon, sunset, and dusk and adds them to the attribute table and creates a new layer. 
+This is a point layer processing tool that for a given date, calculates the time of dawn, sunrise, noon, sunset, and dusk and adds them to the attribute table and creates a new layer. 
 
 <div style="text-align:center"><img src="doc/add_sun_attributes.png" alt="Add Sun Attributes"></div>
 
@@ -47,5 +47,5 @@ From a point layer, this processing algorithm adds the time zone the point is in
 
 * Lunar information.
 * Replace the python astral library with the Skyfield library for more precision.
-* Another tool that shows the position of the sun where directly overhead.
+* Another tool that shows the position of the sun when directly overhead.
 * Another tool to display the path of the sun over a 24 hour period with night and day areas.
