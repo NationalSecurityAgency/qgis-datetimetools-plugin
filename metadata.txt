@@ -2,7 +2,7 @@
 name=Date/Time Tools
 qgisMinimumVersion=3.14
 description=Tools to display and convert date, time, time zone, UNIX time (Epoch), Julian date, ISO8601, date differences, times and positions of the sun. 
-version=3.0.6
+version=3.0.7
 author=C Hamilton
 email=adenaculture@gmail.com
 about=This is a set of four tools. 1)Conversion tools to display the local date, time, time zone, UNIX time (Epoch), Julian dates, ISO8601, calculate the difference between two dates, select a location and time zone by clicking on the map and display the closet location and sun statistics. 2) Time zone visualization and/or offset capture tool. 3) A processing tool that adds a time zone field and/or offset to a point layer. 4) A processing tool to add the sun times of dawn, sunrise, noon, sunset, and dusk to a point layer attribute table. NOTE: This plugin is large and is loaded at the time of first use. At first launch, it can take a few seconds to load.
@@ -15,6 +15,7 @@ icon=icon.png
 experimental=False
 deprecated=False
 changelog=
+    3.0.7 - Add as dock widget
     3.0.6 - Update metadata
     3.0.5 - Bug fix with Help menu
     3.0.4 - Added 3 more tools

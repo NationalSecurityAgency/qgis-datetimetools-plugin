@@ -120,7 +120,7 @@ class DateTimeTools(object):
             from .conversionDialog import ConversionDialog
             self.conversionDialog = ConversionDialog(self.iface, self.iface.mainWindow())
             self.conversionDialog.setFloating(True)
-            # self.iface.addDockWidget(Qt.RightDockWidgetArea, self.conversionDialog)
+            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.conversionDialog)
         self.conversionDialog.show()
 
     def startTZCapture(self):
