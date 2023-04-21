@@ -3,7 +3,7 @@ from datetime import datetime
 from pytz import timezone
 import pytz
 from astral.sun import sun
-import astral
+from astral.location import LocationInfo
 
 from qgis.core import (
     QgsPointXY, QgsFeature, QgsGeometry, QgsField,
@@ -119,7 +119,7 @@ class AddAstronomicalAlgorithm(QgsProcessingAlgorithm):
                 pt = transform.transform(pt)
             
             try:
-                locl = astral.LocationInfo('','','',pt.y(), pt.x())
+                locl = LocationInfo('','','',pt.y(), pt.x())
                 if use_utc:
                     s = sun(locl.observer, date=date)
                 else:
