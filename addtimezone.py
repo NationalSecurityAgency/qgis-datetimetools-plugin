@@ -67,6 +67,8 @@ class AddTimezoneAlgorithm(QgsProcessingAlgorithm):
         qdate = dt.date()
         if add_offset and not qdate.isValid():
             raise QgsProcessingException('Use a proper date and rerun algorithm')
+        if add_offset:
+            date = datetime(qdate.year(), qdate.month(), qdate.day())
         
         fields = source.fields()
         src_crs = source.sourceCrs()
@@ -83,7 +85,6 @@ class AddTimezoneAlgorithm(QgsProcessingAlgorithm):
         if src_crs != epsg4326:
             transform = QgsCoordinateTransform(src_crs, epsg4326, QgsProject.instance())
         tzf = tzf_instance.getTZF()
-        date = datetime(qdate.year(), qdate.month(), qdate.day())
         total = 100.0 / source.featureCount() if source.featureCount() else 0
 
         iterator = source.getFeatures()
@@ -98,14 +99,15 @@ class AddTimezoneAlgorithm(QgsProcessingAlgorithm):
             try:
                 msg = tzf.timezone_at(lng=pt.x(), lat=pt.y())
             except Exception:
-                msg = None
-            if not msg:
                 msg = ''
             if add_offset:
                 if msg:
-                    tz = timezone(msg)
-                    loc_dt = tz.localize(date)
-                    offset = loc_dt.strftime('%z')
+                    try:
+                        tz = timezone(msg)
+                        loc_dt = tz.localize(date)
+                        offset = loc_dt.strftime('%z')
+                    except Exception:
+                        offset = ''
                 else:
                     offset = ''
                 f.setAttributes(feature.attributes() + [msg, offset])
