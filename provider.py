@@ -3,6 +3,7 @@ from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 from .addtimezone import AddTimezoneAlgorithm
 from .addastronomical import AddAstronomicalAlgorithm
+# from .convertdatetime import ConvertDateTimeAlgorithm
 
 class DateTimeToolsProvider(QgsProcessingProvider):
 
@@ -12,6 +13,7 @@ class DateTimeToolsProvider(QgsProcessingProvider):
     def loadAlgorithms(self):
         self.addAlgorithm(AddAstronomicalAlgorithm())
         self.addAlgorithm(AddTimezoneAlgorithm())
+        # self.addAlgorithm(ConvertDateTimeAlgorithm())
 
     def icon(self):
         return QIcon(os.path.dirname(__file__) + '/images/DateTime.svg')
