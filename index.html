@@ -37,7 +37,12 @@ code {
 </head>
 <body>
 <h1>Date/Time Tools Plugin</h1>
-<p>The QGIS Date/Time Tools plugin provides four tools to manipulate date, time, time zones, and times of the sun. These are the four tools.</p>
+<p>The QGIS Date/Time Tools plugin provides tools to manipulate date, time, time zones, and times of the sun.</p>
+<h2>Installation</h2>
+<p>This plugin requires 3 additional libraries not provided by QGIS. These can be installed by opening up your OSGeo4W Shell from the QGIS menu and typing the command "<strong>pip install timezonefinder astral reverse_geocoder</strong>" or whatever method you use to install Python libraries.</p>
+<p>You do not need to be a system adminstrator to be able to install these libraries.</p>
+<h2>Date/Time Tools Overview</h2>
+<p>These are the tools provided by Date/Time Tools.</p>
 <ul>
 <li><img src="images/DateTime.svg" width=24 height=24 alt="Date/Time Conversion"> <strong><em>Date/Time Conversion</em></strong> - This is a dialog box that displays different formats of a date and time, computes time differences, and displays various sun times such as dawn, sunrise, noon, sunset, and dusk.</li>
 <li><img src="images/tzCapture.svg" width=24 height=24 alt="Time zone capture"> <strong><em>Time Zone Capture</em></strong> - With this tool selected, as the mouse moves across the canvas the time zone and/or time offset is displayed in the lower left info box and the time zone is highlighted on the canvas.</li>
@@ -72,11 +77,4 @@ code {
 
 <p>From a point layer, this processing algorithm adds the time zone the point is in as well as the time zone offset if a date is give and <strong>Add option time zone offset for a particular date</strong> is selected. These are the attribute fields that are added.</p>
 <div style="text-align:center"><img src="doc/tz_attributes.png" alt="Time Zone Attributes"></div>
-
-<h2>Future development may include</h2>
-<ul>
-<li>Lunar information.</li>
-<li>Replace the python astral library with the Skyfield library for more precision.</li>
-<li>Another tool that shows the position of the sun when directly overhead.</li>
-<li>Another tool to display the path of the sun over a 24 hour period with night and day areas.</li>
-</ul></body>
+</body>

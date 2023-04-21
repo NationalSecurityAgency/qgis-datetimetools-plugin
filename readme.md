@@ -1,6 +1,16 @@
 # Date/Time Tools Plugin
 
-The QGIS Date/Time Tools plugin provides four tools to manipulate date, time, time zones, and times of the sun. These are the four tools.
+The QGIS Date/Time Tools plugin provides tools to manipulate date, time, time zones, and times of the sun.
+
+## Installation
+
+This plugin requires 3 additional libraries not provided by QGIS. These can be installed by opening up your OSGeo4W Shell from the QGIS menu and typing the command "**pip install timezonefinder astral reverse_geocoder**" or whatever method you use to install Python libraries.
+
+You do not need to be a system adminstrator to be able to install these libraries.
+
+## Date/Time Tools Overview
+
+These are the tools provided by Date/Time Tools.
 
 * <img src="images/DateTime.svg" width=24 height=24 alt="Date/Time Conversion"> ***Date/Time Conversion*** - This is a dialog box that displays different formats of a date and time, computes time differences, and displays various sun times such as dawn, sunrise, noon, sunset, and dusk.
 * <img src="images/tzCapture.svg" width=24 height=24 alt="Time zone capture"> ***Time Zone Capture*** - With this tool selected, as the mouse moves across the canvas the time zone and/or time offset is displayed in the lower left info box and the time zone is highlighted on the canvas.
@@ -42,10 +52,3 @@ The input layer is a point layer, a date must be specified, and the results are 
 From a point layer, this processing algorithm adds the time zone the point is in as well as the time zone offset if a date is give and **Add option time zone offset for a particular date** is selected. These are the attribute fields that are added.
 
 <div style="text-align:center"><img src="doc/tz_attributes.png" alt="Time Zone Attributes"></div>
-
-## Future development may include
-
-* Lunar information.
-* Replace the python astral library with the Skyfield library for more precision.
-* Another tool that shows the position of the sun when directly overhead.
-* Another tool to display the path of the sun over a 24 hour period with night and day areas.
