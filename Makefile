@@ -10,7 +10,6 @@ deploy:
 	cp -vrf images $(PLUGINS)
 	cp -vrf ui $(PLUGINS)
 	cp -vfr doc $(PLUGINS)
-#	cp -vrf libs $(PLUGINS)
 	cp -vf helphead.html index.html
 	python -m markdown -x extra readme.md >> index.html
 	echo '</body>' >> index.html
