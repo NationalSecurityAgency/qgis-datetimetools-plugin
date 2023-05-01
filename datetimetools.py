@@ -122,7 +122,7 @@ class DateTimeTools(object):
     def requirements(self):
         message = '''
         <p>This plugin requires <a href="https://timezonefinder.readthedocs.io/en/latest/">TimeZoneFinder</a>, <a href="https://sffjunkie.github.io/astral/">Astral</a>, and <a href="https://pypi.org/project/reverse_geocoder/">reverse_geocoder</a> libraries.<br/><br/>
-        These libraries can be installed by running the OSGeo4W shell and running 'pip install timezonefinder astral reverse_geocoder' or whatever method you use to install python packages. If you run the OSGeo4W shell as a system adminstrator the libraries will installed in the core OSGeo4W Python distribution; otherwise, they will be installed locally.<p>
+        These libraries can be installed by running the OSGeo4W shell and running 'pip install timezonefinder astral' and then 'pip install reverse_geocoder' or whatever method you use to install python packages. To avoid some problems 'pip install reverse_geocoder' separately. If you run the OSGeo4W shell as a system administrator the libraries will installed in the core OSGeo4W Python distribution; otherwise, they will be installed locally.<p>
         <p>Once the libraries are installed, please restart QGIS.</p>
         '''
         QMessageBox.information(self.iface.mainWindow(), 'Plugin Requirements not Satisfied', message)
