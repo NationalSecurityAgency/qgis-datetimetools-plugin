@@ -6,7 +6,7 @@ The QGIS Date/Time Tools plugin provides tools to manipulate date, time, time zo
 
 This plugin requires 3 additional libraries not provided by QGIS. These can be installed by opening up your OSGeo4W Shell from the QGIS menu and typing the command "**pip install timezonefinder astral reverse_geocoder**" or whatever method you use to install Python libraries.
 
-You do not need to be a system adminstrator to be able to install these libraries.
+You do not need to be a system administrator to be able to install these libraries.
 
 ## Date/Time Tools Overview
 
@@ -34,7 +34,7 @@ With this tool selected, as the mouse moves across the canvas, the time zone and
 
 <div style="text-align:center"><img src="doc/timezonecapture.png" alt="Time zone capture"></div>
 
-When this tool is activated a settings dialog box is displayed. Here you can choose whether to diplays just the time zone, time zone offset, or both the time zone and it's offset. The time zone offset requires a date to be specified. Clicking on the map copies this information to the clipboard.
+When this tool is activated a settings dialog box is displayed. Here you can choose whether to displays just the time zone, time zone offset, or both the time zone and it's offset. The time zone offset requires a date to be specified. Clicking on the map copies this information to the clipboard.
 
 ## <img src="images/sun.svg" width=24 height=24 alt="Add Sun Attributes"> Add Sun Attributes
 This is a point layer processing tool that for a given date, calculates the time of dawn, sunrise, noon, sunset, and dusk and adds them to the attribute table and creates a new layer. 
