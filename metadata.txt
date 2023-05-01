@@ -2,11 +2,11 @@
 name=Date/Time Tools
 qgisMinimumVersion=3.14
 description=Tools to display and convert date, time, time zone, UNIX time (Epoch), Julian date, ISO8601, date differences, times and positions of the sun. (Note Python library dependencies.)
-version=3.0.8
+version=3.0.9
 author=C Hamilton
 email=adenaculture@gmail.com
 about=
-    This plugin requires 3 Python libraries not provided by the QGIS distribution. Open up the OSGeo4W Shell and type "pip install timezonefinder astral reverse_geocoder" or whatever method you use to install Python libraries. You don't need to be a system adminstrator to do this. 
+    This plugin requires 3 Python libraries not provided by the QGIS distribution. Open up the OSGeo4W Shell and type "pip install timezonefinder astral" and "pip install reverse_geocoder" or whatever method you use to install Python libraries. You don't need to be a system administrator to do this. 
 
     This plugin contains four tools. 1)Conversion tools to display the local date, time, time zone, UNIX time (Epoch), Julian dates, ISO8601, calculate the difference between two dates, select a location and time zone by clicking on the map and display the closet location and sun statistics. 2) Time zone visualization and/or offset capture tool. 3) A processing tool that adds a time zone field and/or offset to a point layer. 4) A processing tool to add the sun times of dawn, sunrise, noon, sunset, and dusk to a point layer attribute table.
 tracker=https://github.com/NationalSecurityAgency/qgis-datetimetools-plugin/issues
@@ -18,6 +18,7 @@ icon=icon.png
 experimental=False
 deprecated=False
 changelog=
+    3.0.9 - Changed Python dependencies missing message.
     3.0.8 - No longer distributing the Python dependencies as a part of the plugin.
     3.0.7 - Add as dock widget
     3.0.6 - Update metadata
