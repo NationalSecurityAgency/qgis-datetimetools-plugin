@@ -2,7 +2,7 @@
 name=Date/Time Tools
 qgisMinimumVersion=3.14
 description=Tools to display and convert date, time, time zone, UNIX time (Epoch), Julian date, ISO8601, date differences, times and positions of the sun. (Note Python library dependencies.)
-version=3.0.9
+version=3.0.10
 author=C Hamilton
 email=adenaculture@gmail.com
 about=
@@ -17,7 +17,9 @@ category=Plugins
 icon=icon.png
 experimental=False
 deprecated=False
+hasProcessingProvider=yes
 changelog=
+    3.0.10 - Fix to allow qgis_process to function correctly.
     3.0.9 - Changed Python dependencies missing message.
     3.0.8 - No longer distributing the Python dependencies as a part of the plugin.
     3.0.7 - Add as dock widget
