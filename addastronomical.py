@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
-from pytz import timezone
-import pytz
+from zoneinfo import ZoneInfo
 from astral.sun import sun
 from astral.location import LocationInfo
 
@@ -124,9 +123,9 @@ class AddAstronomicalAlgorithm(QgsProcessingAlgorithm):
                     s = sun(locl.observer, date=date)
                 else:
                     tz_name = tzf.timezone_at(lng=pt.x(), lat=pt.y())
-                    tz = timezone(tz_name)
-                    loc_dt = tz.localize(date)
-                    s = sun(locl.observer, date=date, tzinfo=loc_dt.tzinfo)
+                    tz = ZoneInfo(tz_name)
+                    loc_dt = date.replace(tzinfo=tz)
+                    s = sun(locl.observer, date=date, tzinfo=tz)
                 dawn = s["dawn"].strftime(fmt)
                 sunrise = s["sunrise"].strftime(fmt)
                 noon = s["noon"].strftime(fmt)
