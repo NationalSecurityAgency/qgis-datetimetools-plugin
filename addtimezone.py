@@ -1,8 +1,7 @@
 import os
 import math
 from datetime import datetime
-from pytz import timezone
-import pytz
+from zoneinfo import ZoneInfo
 
 from qgis.core import (
     QgsPointXY, QgsFeature, QgsGeometry, QgsField,
@@ -103,8 +102,8 @@ class AddTimezoneAlgorithm(QgsProcessingAlgorithm):
             if add_offset:
                 if msg:
                     try:
-                        tz = timezone(msg)
-                        loc_dt = tz.localize(date)
+                        tz = ZoneInfo(msg)
+                        loc_dt = date.replace(tzinfo=tz)
                         offset = loc_dt.strftime('%z')
                     except Exception:
                         offset = ''

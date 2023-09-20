@@ -8,11 +8,9 @@ from qgis.PyQt.uic import loadUiType
 from qgis.core import Qgis, QgsPointXY, QgsLineString, QgsMultiPolygon, QgsPolygon, QgsGeometry, QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject
 from qgis.gui import QgsRubberBand
 import dateutil.parser
-from dateutil.tz import tzlocal
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, MINYEAR
-from pytz import all_timezones, timezone
-import pytz
+from zoneinfo import ZoneInfo, available_timezones
 from .settings import epsg4326, tzf_instance
 from .jdcal import MJD_0, gcal2jd, jd2gcal
 from astral.sun import sun
@@ -71,7 +69,7 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         self.coordCaptureButton.clicked.connect(self.startCapture)
 
         self.timezoneComboBox.view().setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.timezoneComboBox.addItems(all_timezones)
+        self.timezoneComboBox.addItems(sorted(available_timezones()))
         self.timezoneComboBox.currentIndexChanged.connect(self.timezone_changed)
         
         self.dateEdit.setCalendarPopup(True)
@@ -115,22 +113,21 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
             self.canvas.setMapTool(self.savedMapTool)
             self.savedMapTool = None
         self.rubber.reset()
-        
+        QDockWidget.closeEvent(self, e)
+
     def initSystemTime(self):
-        self.tz = tzlocal()
-        dt = datetime.now(self.tz)
-        try:
-            name = dt.tzinfo.zone
-        except Exception:
-            name = dt.tzname()
+        # print('initSystemTime')
+        dt = datetime.now()
+        dt = dt.astimezone()  # This returns the local timezone
+        name = dt.tzname()
         if name in win_tz_map:
             name = win_tz_map[name]
         id = self.timezoneComboBox.findText(name,Qt.MatchExactly)
         if id == -1:
-            offset = int(dt.tzinfo.utcoffset(dt).total_seconds()/3600.0)
+            offset = int(dt.utcoffset().total_seconds()/3600.0)
             name = 'Etc/GMT{:+d}'.format(-offset)
-        self.dt_utc = datetime.now(pytz.utc)
-        self.tz = timezone(name)
+        self.dt_utc = datetime.now(ZoneInfo('UTC'))
+        self.tz = ZoneInfo(name)
 
     def getLocalDateTime(self):
         # print('getLocalDateTime')
@@ -149,7 +146,6 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
 
     @pyqtSlot(QgsPointXY)
     def capturedPoint(self, pt):
-        # print('capturedPoint')
         if self.isVisible() and self.coordCaptureButton.isChecked():
             coord = '{}, {}'.format(pt.y(), pt.x())
             self.coordLineEdit.setText(coord)
@@ -158,32 +154,29 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
 
     @pyqtSlot()
     def stopCapture(self):
-        # print('stopCapture')
         self.coordCaptureButton.setChecked(False)
         self.rubber.reset()
 
     def setCoordinateTimezone(self, lat, lon):
-            tzname = self.tf.timezone_at(lng=lon, lat=lat)
-            if tzname != None:
-                polygon = self.tf.get_geometry(tz_name=tzname)
-                qgs_poly = tzf_to_qgis_polygon(polygon)
-                canvas_crs = self.canvas.mapSettings().destinationCrs()
-                if epsg4326 != canvas_crs:
-                    to_canvas_crs = QgsCoordinateTransform(epsg4326, canvas_crs, QgsProject.instance())
-                    qgs_poly.transform(to_canvas_crs)
-                self.rubber.reset()
-                self.rubber.addGeometry(qgs_poly, None)
-                self.rubber.show()
-                
-            # print('tzname {}'.format(tzname))
-            if tzname:
-                self.tz = timezone(tzname)
-                dt = self.getLocalDateTime()
-                dt = dt.replace(tzinfo=None)
-                dt = self.tz.localize(dt)
-                self.dt_utc = dt.astimezone(pytz.utc)
-                return(True)
-            return(False)
+        # print('setCorrdinateTimezone')
+        tzname = self.tf.timezone_at(lng=lon, lat=lat)
+        if tzname != None:
+            polygon = self.tf.get_geometry(tz_name=tzname)
+            qgs_poly = tzf_to_qgis_polygon(polygon)
+            canvas_crs = self.canvas.mapSettings().destinationCrs()
+            if epsg4326 != canvas_crs:
+                to_canvas_crs = QgsCoordinateTransform(epsg4326, canvas_crs, QgsProject.instance())
+                qgs_poly.transform(to_canvas_crs)
+            self.rubber.reset()
+            self.rubber.addGeometry(qgs_poly, None)
+            self.rubber.show()
+            
+        if tzname:
+            self.tz = ZoneInfo(tzname)
+            dt = self.getLocalDateTime()
+            self.dt_utc = dt.astimezone(ZoneInfo('UTC'))
+            return(True)
+        return(False)
 
     def updateDateTime(self, id=Update.ALL):
         # print('updateDateTime')
@@ -204,19 +197,19 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
             self.timeEdit.blockSignals(False)
         if id != Update.EPOCH:
             try:
-                sec = int((self.dt_utc - datetime.fromtimestamp(0,pytz.utc)).total_seconds())
+                sec = int((self.dt_utc - datetime.fromtimestamp(0,ZoneInfo('UTC'))).total_seconds())
             except Exception:
                 sec = 'Undefined'
             self.epochLineEdit.setText('{}'.format(sec))
         if id != Update.EPOCHMS:
             try:
-                msec = int((self.dt_utc - datetime.fromtimestamp(0,pytz.utc)).total_seconds()*1000.0)
+                msec = int((self.dt_utc - datetime.fromtimestamp(0,ZoneInfo('UTC'))).total_seconds()*1000.0)
             except Exception:
                 msec = 'Undefined'
             self.epochmsLineEdit.setText('{}'.format(msec))
         if id != Update.TIME_ZONE:
             # This should always be true because we have forced the timezone to adhear to the list
-            name = dt.tzinfo.zone
+            name = str(dt.tzinfo)
             id = self.timezoneComboBox.findText(name,Qt.MatchExactly)
             self.timezoneComboBox.blockSignals(True)
             self.timezoneComboBox.setCurrentIndex(id)
@@ -253,7 +246,7 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         dt = self.getLocalDateTime()
         try:
             if self.displaySunUtcCheckBox.isChecked():
-                s = sun(locl.observer, date=dt, tzinfo=pytz.utc)
+                s = sun(locl.observer, date=dt, tzinfo=ZoneInfo('UTC'))
             else:
                 s = sun(locl.observer, date=dt, tzinfo=dt.tzinfo)
         except Exception:
@@ -312,11 +305,9 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
     
     def timezone_changed(self, index):
         tz_name = str(self.timezoneComboBox.itemText(index))
-        self.tz = timezone(tz_name)
+        self.tz = ZoneInfo(tz_name)
         dt = self.getLocalDateTime()
-        dt = dt.replace(tzinfo=None)
-        dt = self.tz.localize(dt)
-        self.dt_utc = dt.astimezone(pytz.utc)
+        self.dt_utc = dt.astimezone(ZoneInfo('UTC'))
         self.updateDateTime(Update.TIME_ZONE)
         
     def on_currentDateTimeButton_pressed(self):
@@ -335,17 +326,15 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
     
     def on_dateEdit_dateChanged(self, date):
         olddt = self.getLocalDateTime()
-        dt = datetime(date.year(), date.month(), date.day(), olddt.hour, olddt.minute, olddt.second, olddt.microsecond)
-        dt = self.tz.localize(dt)
-        self.dt_utc = dt.astimezone(pytz.utc)
+        dt = datetime(date.year(), date.month(), date.day(), olddt.hour, olddt.minute, olddt.second, olddt.microsecond, tzinfo=olddt.tzinfo)
+        self.dt_utc = dt.astimezone(ZoneInfo('UTC'))
         self.updateDateTime(Update.DATE)
     
     def on_timeEdit_timeChanged(self, time):
         # print('on_timeEdit_timeChanged')
         olddt = self.getLocalDateTime()
-        dt = datetime(olddt.year, olddt.month, olddt.day, time.hour(), time.minute(), time.second(), time.msec()*1000)
-        dt = self.tz.localize(dt)
-        self.dt_utc = dt.astimezone(pytz.utc)
+        dt = datetime(olddt.year, olddt.month, olddt.day, time.hour(), time.minute(), time.second(), time.msec()*1000, tzinfo=olddt.tzinfo)
+        self.dt_utc = dt.astimezone(ZoneInfo('UTC'))
         self.updateDateTime(Update.TIME)
 
     def on_coordCommitButton_pressed(self):
@@ -369,7 +358,7 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
             epoch = long(self.epochLineEdit.text().strip())
         except Exception:
             return
-        self.dt_utc = datetime.fromtimestamp(epoch, pytz.utc)
+        self.dt_utc = datetime.fromtimestamp(epoch, ZoneInfo('UTC'))
         self.updateDateTime(Update.EPOCH)
         
     def on_epochmsCommitButton_pressed(self):
@@ -378,7 +367,7 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
             epoch = long(self.epochmsLineEdit.text().strip()) / 1000.0
         except Exception:
             return
-        self.dt_utc = datetime.fromtimestamp(epoch, pytz.utc)
+        self.dt_utc = datetime.fromtimestamp(epoch, ZoneInfo('UTC'))
         self.updateDateTime(Update.EPOCHMS)
         
     def on_julianCommitButton_pressed(self):
@@ -391,8 +380,7 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
             return
         olddt = self.getLocalDateTime()
         dt = datetime(date[0], date[1], date[2], olddt.hour, olddt.minute, olddt.second, olddt.microsecond)
-        dt = self.tz.localize(dt)
-        self.dt_utc = dt.astimezone(pytz.utc)
+        self.dt_utc = dt.astimezone(ZoneInfo('UTC'))
         self.updateDateTime(Update.JULIAN)
         
     def on_iso8601CommitButton_pressed(self):
@@ -400,11 +388,11 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         if not str:
             return
         try:
-            dt = dateutil.parser.parse(str, default=datetime(MINYEAR, 1, 1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc))
+            dt = dateutil.parser.parse(str, default=datetime(MINYEAR, 1, 1, hour=0, minute=0, second=0, microsecond=0, tzinfo=ZoneInfo('UTC')))
         except Exception:
             self.iface.messageBar().pushMessage("", "Invalid ISO8601 date and time", level=Qgis.Warning, duration=2)
             return
-        self.dt_utc = dt.astimezone(pytz.utc)
+        self.dt_utc = dt.astimezone(ZoneInfo('UTC'))
         self.updateDateTime(Update.UTC)
 
     def on_iso8601_2_CommitButton_pressed(self):
@@ -415,7 +403,7 @@ class ConversionDialog(QDockWidget, FORM_CLASS):
         if not str:
             return
         try:
-            dt_delta = dateutil.parser.parse(str, default=datetime(MINYEAR, 1, 1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc))
+            dt_delta = dateutil.parser.parse(str, default=datetime(MINYEAR, 1, 1, hour=0, minute=0, second=0, microsecond=0, tzinfo=ZoneInfo('UTC')))
         except Exception:
             self.iface.messageBar().pushMessage("", "Invalid ISO8601 date and time", level=Qgis.Warning, duration=2)
             return
