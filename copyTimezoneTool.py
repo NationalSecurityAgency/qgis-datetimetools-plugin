@@ -4,8 +4,8 @@ from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import Qgis, QgsCoordinateTransform, QgsPointXY, QgsProject, QgsSettings, QgsPolygon, QgsMultiPolygon, QgsLineString, QgsGeometry
 from qgis.gui import QgsMapToolEmitPoint, QgsVertexMarker, QgsRubberBand
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from pytz import timezone
-import pytz
 
 from .settings import epsg4326, tzf_instance
 # import traceback
@@ -55,9 +55,9 @@ class CopyTimeZoneTool(QgsMapToolEmitPoint):
             if mode == 1:
                 msg = tz_name
             else:
-                tz = timezone(tz_name)
+                tz = ZoneInfo(tz_name)
                 date = self.settings.date()
-                loc_dt = tz.localize(datetime(date.year(), date.month(), date.day()))
+                loc_dt = datetime(date.year(), date.month(), date.day(), tzinfo=tz)
                 offset = loc_dt.strftime('%z')
                 if mode == 0:
                     msg = '{} ({})'.format(tz_name, offset)
