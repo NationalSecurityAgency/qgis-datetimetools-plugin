@@ -1,7 +1,7 @@
 PLUGINNAME = datetimetools
 PLUGINS = "$(HOME)"/AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/$(PLUGINNAME)
 PY_FILES = __init__.py addastronomical.py addtimezone.py captureCoordinate.py conversionDialog.py copyModeSettings.py copyTimezoneTool.py datetimetoolsprocessing.py datetimetools.py jdcal.py provider.py settings.py util.py wintz.py
-EXTRAS = metadata.txt icon.png
+EXTRAS = metadata.txt icon.png LICENSE
 
 deploy:
 	mkdir -p $(PLUGINS)
