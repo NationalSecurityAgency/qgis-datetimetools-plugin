@@ -11,9 +11,8 @@
 import os
 import math
 import datetime
+from datetime import timezone
 import dateutil.parser
-from pytz import all_timezones, timezone
-import pytz
 import traceback
 
 from qgis.core import (
@@ -174,12 +173,12 @@ class ConvertDateTimeAlgorithm(QgsProcessingFeatureBasedAlgorithm):
                 newdt = datetime(dt.year(), dt.month(), dt.day())
                 dt_resolution = 3
             elif self.dt_input_type == 1:  # User has specified this is UNIX timestamp
-                 newdt = datetime.utcfromtimestamp(float(dt), pytz.utc)
+                 newdt = datetime.fromtimestamp(float(dt), timezone.utc)
             elif isinstance(dt, str):
                 d1 = dateutil.parser.parse(dt, dayfirst=self.hint_day_first, yearfirst=self.hint_year_first,
-                    default=datetime.datetime(datetime.MINYEAR, 1, 1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc))
+                    default=datetime.datetime(datetime.MINYEAR, 1, 1, hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc))
                 d2 = dateutil.parser.parse(dt, dayfirst=self.hint_day_first, yearfirst=self.hint_year_first,
-                    default=datetime.datetime(datetime.MINYEAR, 2, 2, hour=1, minute=1, second=1, microsecond=1, tzinfo=pytz.utc))
+                    default=datetime.datetime(datetime.MINYEAR, 2, 2, hour=1, minute=1, second=1, microsecond=1, tzinfo=timezone.utc))
                 dt_resolution = self.checkDateTime(d1, d2)
                 newdt = d1
             else:
@@ -205,7 +204,7 @@ class ConvertDateTimeAlgorithm(QgsProcessingFeatureBasedAlgorithm):
             # s = '{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}'.format(newdt.year, newdt.month, newdt.day, newdt.hour, newdt.minute, newdt.second)
             attr.append(s)
         elif self.dt_output_type == 2:  # UNIX Timestamp
-            utc = newdt.astimezone(pytz.utc)
+            utc = newdt.astimezone(timezone.utc)
             dval = utc.timestamp()
             attr.append(dval)  # This will be a double floating point number
         elif self.dt_output_type == 3:  # Date object
